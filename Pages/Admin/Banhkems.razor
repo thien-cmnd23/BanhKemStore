@@ -1,0 +1,65 @@
+﻿@page "/admin/banhkems"
+@page "/admin"
+<h4>This is the books component</h4>
+@inherits OwningComponentBase<IBanhKemStoreRepository>
+<table class="table table-sm table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Genre</th>
+            <th>Price</th>
+            <td />
+        </tr>
+    </thead>
+    <tbody>
+        @if (BanhKemData?.Count() > 0)
+        {
+            @foreach (BanhKem b in BanhKemData)
+            {
+                <tr>
+                    <td>@b.BanhKemID</td>
+                    <td>@b.Title</td>
+                    <td>@b.Genre</td>
+                    <td>@b.Price.ToString("c")</td>
+                    <td>
+                        <NavLink class="btn btn-info btn-sm"
+                                 href="@GetDetailsUrl(b.BanhKemID)">
+                            Details
+                        </NavLink>
+                        <NavLink class="btn btn-warning btn-sm"
+                                 href="@GetEditUrl(b.BanhKemID)">
+                            Edit
+                        </NavLink>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center">No Books</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<NavLink class="btn btn-primary" href="/admin/books/create">Create</NavLink>
+@code {
+    public IBanhKemStoreRepository Repository => Service;
+    public IEnumerable<BanhKem> BanhKemData { get; set; }
+    protected async override Task OnInitializedAsync()
+    {
+        await UpdateData();
+    }
+    public async Task UpdateData()
+    {
+        BanhKemData = await Repository.BanhKems.ToListAsync();
+    }
+    public async Task DeleteBanhKem(BanhKem b)
+    {
+        Repository.DeleteBanhKems(b);
+        await UpdateData();
+    }
+    public string GetDetailsUrl(long id) => $"/admin/banhkems/details/{id}";
+    public string GetEditUrl(long id) => $"/admin/banhkems/edit/{id}";
+}

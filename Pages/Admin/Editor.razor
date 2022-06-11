@@ -1,0 +1,72 @@
+﻿@page "/admin/banhkem/edit/{id:long}"
+@page "/admin/banhkem/create"
+@inherits OwningComponentBase<IBanhKemStoreRepository>
+<style>
+    div.validation-message {
+        color: rgb(220, 53, 69);
+        font-weight: 500
+    }
+</style>
+<h3 class="bg-@ThemeColor text-white text-center p-1">@TitleText a Banhkem</h3>
+<EditForm Model="Banhkem" OnValidSubmit="SaveBanhKem">
+    <DataAnnotationsValidator />
+    @if (Banhkem.BanhKemID != 0)
+    {
+        <div class="form-group">
+            <label>ID</label>
+            <input class="form-control" disabled value="@Banhkem.BanhKemID" />
+        </div>
+    }
+    <div class="form-group">
+        <label>Title</label>
+        <ValidationMessage For="@(() => Banhkem.Title)" />
+        <InputText class="form-control" @bind-Value="Banhkem.Title" />
+    </div>
+    <div class="form-group">
+        <label>Description</label>
+        <ValidationMessage For="@(() => Banhkem.Description)" />
+        <InputText class="form-control" @bind-Value="Banhkem.Description" />
+    </div>
+    <div class="form-group">
+        <label>Genre</label>
+        <ValidationMessage For="@(() => Banhkem.Genre)" />
+        <InputText class="form-control" @bind-Value="Banhkem.Genre" />
+    </div>
+    <div class="form-group">
+        <label>Price</label>
+        <ValidationMessage For="@(() => Banhkem.Price)" />
+        <InputNumber class="form-control" @bind-Value="Banhkem.Price" />
+    </div>
+    <button type="submit" class="btn btn-@ThemeColor">Save</button>
+    <NavLink class="btn btn-secondary"
+             href="/admin/products">Cancel</NavLink>
+</EditForm>
+@code {
+    public IBanhKemStoreRepository Repository => Service;
+    [Inject]
+    public NavigationManager NavManager { get; set; }
+    [Parameter]
+    public long Id { get; set; } = 0;
+    public BanhKem Banhkem { get; set; } = new BanhKem();
+    protected override void OnParametersSet()
+    {
+        if (Id != 0)
+        {
+            Banhkem = Repository.BanhKems.FirstOrDefault(b => b.BanhKemID == Id);
+        }
+    }
+    public void SaveBanhKem()
+    {
+        if (Id == 0)
+        {
+            Repository.CreateBanhKems(Banhkem);
+        }
+        else
+        {
+            Repository.SaveBanhKems(Banhkem);
+        }
+        NavManager.NavigateTo("/admin/banhkem");
+    }
+    public string ThemeColor => Id == 0 ? "primary" : "warning";
+    public string TitleText => Id == 0 ? "Create" : "Edit";
+}
